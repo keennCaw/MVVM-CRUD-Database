@@ -1,11 +1,13 @@
 package com.keennhoward.mvvmdb;
-
+//4
 import android.app.Application;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
+
+//repository is not part of the android architecture components but is considered best practice because it provides an abstraction layer
 
 public class NoteRepository {
     //member variables

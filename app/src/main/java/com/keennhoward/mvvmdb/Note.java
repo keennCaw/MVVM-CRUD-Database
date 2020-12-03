@@ -1,5 +1,5 @@
 package com.keennhoward.mvvmdb;
-
+//1
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
