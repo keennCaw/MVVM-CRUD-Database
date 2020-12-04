@@ -15,15 +15,12 @@ public class Note {
 
     private String description;
 
-    private String name;
-
     private int priority;
 
     //if any field is not in this constructor room cannot recreate it
-    public Note(String title, String description, String name, int priority) {
+    public Note(String title, String description, int priority) {
         this.title = title;
         this.description = description;
-        this.name = name;
         this.priority = priority;
     }
 
@@ -43,10 +40,6 @@ public class Note {
 
     public String getDescription() {
         return description;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public int getPriority() {
