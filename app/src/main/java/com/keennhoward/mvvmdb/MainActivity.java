@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     //put requests code in constants so that it is easily distinguished
     public static final int ADD_NOTE_REQUEST = 1;
+    public static final int EDIT_NOTE_REQUEST = 2;
 
     private NoteViewModel noteViewModel;
 
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //use MainActivity.this instead of just this because it will point to the onClickListener
-                Intent intent = new Intent(MainActivity.this, AddNoteActivity.class);
+                Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class);
                 startActivityForResult(intent, ADD_NOTE_REQUEST); //to get input back (Request Code is used to distinguish between requests)
             }
         });
@@ -82,6 +83,24 @@ public class MainActivity extends AppCompatActivity {
             }
         }).attachToRecyclerView(recyclerView); //use this to attach the ItemTouchHelper to your recycler view otherwise it will not be implemented
 
+            //implement onItemClickListener interface we made on NoteAdapter
+        adapter.setOnItemClickListener(new NoteAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Note note) {
+                Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class);
+
+                //pass in the note clicked to be edited
+                //id is also needed to be passed
+                intent.putExtra(AddEditNoteActivity.EXTRA_ID, note.getId());
+                intent.putExtra(AddEditNoteActivity.EXTRA_TITLE,note.getTitle());
+                intent.putExtra(AddEditNoteActivity.EXTRA_DESCRIPTION,note.getDescription());
+                intent.putExtra(AddEditNoteActivity.EXTRA_PRIORITY,note.getPriority());
+
+                //start activity for result with intent and request code(Check request code)
+                startActivityForResult(intent,EDIT_NOTE_REQUEST);
+            }
+        });
+
     }
 
 
@@ -93,16 +112,33 @@ public class MainActivity extends AppCompatActivity {
 
         //check which request we are handling && if resultCode is RESULT_OK
         if(requestCode == ADD_NOTE_REQUEST && resultCode == RESULT_OK){
-            String title = data.getStringExtra(AddNoteActivity.EXTRA_TITLE);
-            String description = data.getStringExtra(AddNoteActivity.EXTRA_DESCRIPTION);
-            int priority = data.getIntExtra(AddNoteActivity.EXTRA_PRIORITY, 1);
+            String title = data.getStringExtra(AddEditNoteActivity.EXTRA_TITLE);
+            String description = data.getStringExtra(AddEditNoteActivity.EXTRA_DESCRIPTION);
+            int priority = data.getIntExtra(AddEditNoteActivity.EXTRA_PRIORITY, 1);
 
             //create a note from all the data to insert it into the database
             Note note = new Note(title, description,priority);
             noteViewModel.insert(note);
 
             Toast.makeText(this, "Note Saved", Toast.LENGTH_SHORT).show();
+        }else if(requestCode == EDIT_NOTE_REQUEST && resultCode == RESULT_OK){
+
+            int id = data.getIntExtra(AddEditNoteActivity.EXTRA_ID, -1);
+
+            if(id == -1){ //check if something went wrong
+                Toast.makeText(this, "Note Can't be updated", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String title = data.getStringExtra(AddEditNoteActivity.EXTRA_TITLE);
+            String description = data.getStringExtra(AddEditNoteActivity.EXTRA_DESCRIPTION);
+            int priority = data.getIntExtra(AddEditNoteActivity.EXTRA_PRIORITY, 1);
+            Note note = new Note(title,description,priority);
+            note.setId(id); //without this Room can't identify the update and it will not happen
+            noteViewModel.update(note);//update note using the created note object
+
+            Toast.makeText(this, "Note Updated", Toast.LENGTH_SHORT).show();
         }
+
         //this will also be triggered over the back button in the other activity(RESULT_CANCELLED)
         //add android:parentActivityName=".MainActivity" to the activity in the manifest you want a back button to show
         //also add android:launchMode="singleTop" on the main activity in the manifest so that once it goes back it will not trigger on create again and just go back to the previous one

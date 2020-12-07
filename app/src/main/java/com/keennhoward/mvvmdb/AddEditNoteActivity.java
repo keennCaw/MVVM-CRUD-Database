@@ -12,10 +12,12 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.Toast;
 
-public class AddNoteActivity extends AppCompatActivity {
+public class AddEditNoteActivity extends AppCompatActivity {
     //psfs for auto complete public static final String
     //constants
     //best practice for intent Extra keys is to use the package name to keep them unique
+    public static final String EXTRA_ID =
+            "com.keennhoward.mvvmdb.EXTRA_ID";
     public static final String EXTRA_TITLE =
             "com.keennhoward.mvvmdb.EXTRA_TITLE";
     public static final String EXTRA_DESCRIPTION =
@@ -42,7 +44,19 @@ public class AddNoteActivity extends AppCompatActivity {
 
         //to get X on top left corner
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
-        setTitle("Add Note"); //set action bar title
+
+        Intent intent = getIntent();
+
+        if(intent.hasExtra(EXTRA_ID)){ //check intent if it has the EXTRA with the key EXTRA_ID
+            setTitle("Edit Note");
+            //fill the fields with the values passed from the intent
+            editTextTitle.setText(intent.getStringExtra(EXTRA_TITLE));
+            editTextDescription.setText(intent.getStringExtra(EXTRA_DESCRIPTION));
+            numberPickerPriority.setValue(intent.getIntExtra(EXTRA_PRIORITY, 1));
+
+        }else {
+            setTitle("Add Note"); //set action bar title
+        }
     }
 
     private void saveNote(){
@@ -67,6 +81,11 @@ public class AddNoteActivity extends AppCompatActivity {
         data.putExtra(EXTRA_DESCRIPTION,description);
         data.putExtra(EXTRA_PRIORITY, priority);
 
+        int id = getIntent().getIntExtra(EXTRA_ID, -1);//default is -1 because the database will not have an id that is -1 so if it is -1 it is invalid
+
+        if(id != -1){
+            data.putExtra(EXTRA_ID,id);
+        }
         //to indicate if the input was successful or not
         setResult(RESULT_OK, data);
 

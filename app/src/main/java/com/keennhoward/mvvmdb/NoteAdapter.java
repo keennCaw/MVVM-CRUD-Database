@@ -15,7 +15,9 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> { 
 
     private List<Note> notes = new ArrayList<>(); //assign to new ArrayList otherwise it wil be null
 
-   //implement methods
+    private OnItemClickListener listener; //use OnItemClickListener with your package name
+
+    //implement methods
     //<NoteAdapter.NoteHolder> is used in these methods
     @NonNull
     @Override //this is where we have to create and return a NoteHolder to use its layout
@@ -26,7 +28,8 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> { 
         return new NoteHolder(itemView);
     }
 
-    @Override //this is where we get the data from the single note java objects into the views of the note holder
+    @Override
+    //this is where we get the data from the single note java objects into the views of the note holder
     public void onBindViewHolder(@NonNull NoteHolder holder, int position) {
 
         Note currentNote = notes.get(position);
@@ -40,15 +43,16 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> { 
     public int getItemCount() {
         return notes.size();
     }
+
     //to get the observed list of notes live data to the recyclerview
-    public void setNotes(List<Note> notes){
+    public void setNotes(List<Note> notes) {
         this.notes = notes;
         notifyDataSetChanged(); //to tell the adapter to redraw layout(Not the best solution)
     }
 
     //public because we want to call it from the main activity
     //gets the note at the specified position and returns it
-    public Note getNoteAt(int position){
+    public Note getNoteAt(int position) {
         return notes.get(position); //to get the note from this adapter to the outside
     }
 
@@ -61,12 +65,39 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> { 
 
         //create constructor matching super
         //here we can assign our three textViews
+        //the itemView is the whole card view
         public NoteHolder(@NonNull View itemView) {
             super(itemView);
             //assign textViews
             textViewTitle = itemView.findViewById(R.id.text_view_title);
             textViewDescription = itemView.findViewById(R.id.text_view_description);
             textViewPriority = itemView.findViewById(R.id.text_view_priority);
+
+            //set click listener to itemView
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();//gets the position of the clicked item
+                    //check if listener is = null because it is not guaranteed to be called
+                    if (listener != null && position != RecyclerView.NO_POSITION) { //position != RecyclerView.NO_POSITION check so that you don't call an item with an invalid position
+                        listener.onItemClick(notes.get(position));// call onItemClick on this packages OnItemClickListener and then passes the note at the position
+                    }
+                }
+            });
         }
+    }
+
+    //add click event to main activity
+    public interface OnItemClickListener {
+        //what ever implements this interface must also implement this method
+        void onItemClick(Note note);
+    }
+
+    //to call methods from this adapter onto OnItemClickListener we need a reference to it
+    //you can use the listener variable to call the onItemClick on it to forward the note object to whatever implements the interface it is on
+    //save listener on a member variable(Global)
+    public void setOnItemClickListener(OnItemClickListener listener) { //use OnItemClickListener with your package name
+        //assign member variable listener to the listener that is passed
+        this.listener = listener;
     }
 }
