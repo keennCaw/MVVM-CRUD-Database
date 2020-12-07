@@ -46,6 +46,12 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> { 
         notifyDataSetChanged(); //to tell the adapter to redraw layout(Not the best solution)
     }
 
+    //public because we want to call it from the main activity
+    //gets the note at the specified position and returns it
+    public Note getNoteAt(int position){
+        return notes.get(position); //to get the note from this adapter to the outside
+    }
+
     //View Holder Class
     //this will hold the views in our single recyclerview items
     class NoteHolder extends RecyclerView.ViewHolder {

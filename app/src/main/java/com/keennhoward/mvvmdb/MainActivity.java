@@ -1,14 +1,19 @@
 package com.keennhoward.mvvmdb;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -59,6 +64,24 @@ public class MainActivity extends AppCompatActivity {
                 adapter.setNotes(notes);
             }
         }); //LiveData is lifecycle aware and will only update the activity if it is in the foreground if the activity is destroyed it will also clean the reference
+
+
+        //adds swipe function to recycler view
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) { //(drag support(0 means not supported) ,swipe direction support)
+            //onMove is for drag and drop functionality
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+            //onSwiped is for swiping
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                //deletes the note at viewHolder.getAdapterPosition()
+                noteViewModel.delete(adapter.getNoteAt(viewHolder.getAdapterPosition()));
+                Toast.makeText(MainActivity.this, "Note deleted", Toast.LENGTH_SHORT).show();
+            }
+        }).attachToRecyclerView(recyclerView); //use this to attach the ItemTouchHelper to your recycler view otherwise it will not be implemented
+
     }
 
 
@@ -85,6 +108,28 @@ public class MainActivity extends AppCompatActivity {
         //also add android:launchMode="singleTop" on the main activity in the manifest so that once it goes back it will not trigger on create again and just go back to the previous one
         else{
             Toast.makeText(this, "Note not Saved", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //add menu to actionbar
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    //add function to menu item
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.delete_all_notes:
+                noteViewModel.deleteAllNotes();
+                Toast.makeText(this, "All notes deleted", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }
