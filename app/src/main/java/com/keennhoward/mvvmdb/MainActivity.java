@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 //update recycler view
                 //accessing adapter here will make it a final variable
                 //update adapter every time there is a change in the note_table
-                adapter.setNotes(notes);
+                adapter.submitList(notes);
             }
         }); //LiveData is lifecycle aware and will only update the activity if it is in the foreground if the activity is destroyed it will also clean the reference
 
